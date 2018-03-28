@@ -20,7 +20,8 @@ if (! defined('WPINC')) {
 
 define('POSTTYPEEXPORT_PATH', plugin_dir_path(__FILE__));
 define('POSTTYPEEXPORT_URL', plugins_url('', __FILE__));
-define('POSTTYPEEXPORT_TEMPLATE_PATH', POSTTYPEEXPORT_PATH . 'templates/');
+define('POSTTYPEEXPORT_VIEW_PATH', POSTTYPEEXPORT_PATH . 'views/');
+define('POSTTYPEEXPORT_CACHE_DIR', trailingslashit(wp_upload_dir()['basedir']) . 'cache/blade-cache/');
 
 load_plugin_textdomain('post-type-export', false, plugin_basename(dirname(__FILE__)) . '/languages');
 
