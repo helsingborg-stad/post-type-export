@@ -1,0 +1,16 @@
+{
+    "name": "helsingborg-stad/post-type-export",
+    "description": "Plugin to export post types as CSV.",
+    "type": "wordpress-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jonatan Hanson",
+            "email": "jonatan.hanson@hiq.se"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "philo/laravel-blade": "^3.1"
+    }
+}
