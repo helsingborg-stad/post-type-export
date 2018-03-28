@@ -14,7 +14,7 @@ class Exporter
 
     public function admin_menu()
     {
-  		add_menu_page(
+        add_menu_page(
             __('Export post type', 'post-type-export'),
             __('Export post type', 'post-type-export'),
             'publish_pages',
@@ -30,8 +30,12 @@ class Exporter
 
     public function exportForm()
     {
+    	// get post types, skip attachment
+    	$postTypes = get_post_types(array('public' => true));
+    	unset($postTypes['attachment']);
+
         $data = array();
-        $data['postTypes'] = get_post_types(array('public' => true, '_builtin' => false));
+        $data['postTypes'] = $postTypes;
 
         echo $this->blade('form', $data);
     }
@@ -45,8 +49,63 @@ class Exporter
             return;
         }
 
-        $query = new \WP_Query(array('post_type' => $_POST['post_type']));
-        $posts = $query->posts;
+        $postType = $_POST['post_type'];
+
+        global $wpdb;
+        $postArray = $wpdb->get_results("
+            SELECT *
+            FROM {$wpdb->posts}
+            WHERE post_type = '{$postType}'
+            	AND post_status = 'publish'
+        ", ARRAY_A);
+
+        // Create the CSV file and force download it
+        $this->downloadSendHeaders($postType . '_' . date('Y-m-d') . '.csv');
+        echo chr(239) . chr(187) . chr(191);
+        echo $this->arrayToCsv($postArray);
+        die();
+    }
+
+    /**
+     * Convert a multi-dimensional, associative array to CSV data
+     * @param  array $data the array of data
+     * @return string      CSV text
+     */
+    public function arrayToCsv($data)
+    {
+        // Don't create a file, attempt to use memory instead
+        $fh = fopen('php://temp', 'rw');
+
+        // write out the headers
+        fputcsv($fh, array_keys(current($data)));
+
+        // write out the data
+        foreach ($data as $row) {
+            fputcsv($fh, $row);
+        }
+        rewind($fh);
+        $csv = stream_get_contents($fh);
+        fclose($fh);
+
+        return $csv;
+    }
+
+    public function downloadSendHeaders($filename)
+    {
+        // disable caching
+        $now = gmdate("D, d M Y H:i:s");
+        header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+        header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
+        header("Last-Modified: {$now} GMT");
+
+        // force download
+        header("Content-Type: application/force-download");
+        header("Content-Type: application/octet-stream");
+        header("Content-Type: application/download");
+
+        // disposition / encoding on response body
+        header("Content-Disposition: attachment;filename={$filename}");
+        header("Content-Transfer-Encoding: binary");
     }
 
     /**

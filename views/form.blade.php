@@ -1,7 +1,7 @@
 <div class="wrap">
     <h1><?php _e('Export post type', 'post-type-export' ); ?></h1>
     <div>
-    <p><?php _e('Export post types as CSV.', 'post-type-export' ); ?></p>
+    <p><?php _e('Export post types as CSV file format.', 'post-type-export' ); ?></p>
         <form method="post" action="/wp-admin/admin-post.php">
             {!! wp_nonce_field('export', 'export-post-type') !!}
             <table class="form-table">
