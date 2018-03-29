@@ -30,9 +30,9 @@ class Exporter
 
     public function exportForm()
     {
-    	// get post types, skip attachment
-    	$postTypes = get_post_types(array('public' => true));
-    	unset($postTypes['attachment']);
+        // get post types, skip attachment
+        $postTypes = get_post_types(array('public' => true));
+        unset($postTypes['attachment']);
 
         $data = array();
         $data['postTypes'] = $postTypes;
@@ -51,18 +51,23 @@ class Exporter
 
         $postType = $_POST['post_type'];
 
-        global $wpdb;
-        $postArray = $wpdb->get_results("
-            SELECT *
-            FROM {$wpdb->posts}
-            WHERE post_type = '{$postType}'
-            	AND post_status = 'publish'
-        ", ARRAY_A);
+        $query = new \WP_Query(array(
+        	'post_type' => $postType,
+        	'post_status' => 'publish',
+        	'posts_per_page' => -1
+    	));
+        $posts = $query->posts;
+        wp_reset_postdata();
 
-        // Create the CSV file and force download it
+        foreach ($posts as &$post) {
+        	// Typecast object to array
+        	$post = (array) $post;
+        }
+
+        //Create the CSV file and force download it
         $this->downloadSendHeaders($postType . '_' . date('Y-m-d') . '.csv');
         echo chr(239) . chr(187) . chr(191);
-        echo $this->arrayToCsv($postArray);
+        echo $this->arrayToCsv($posts);
         die();
     }
 
